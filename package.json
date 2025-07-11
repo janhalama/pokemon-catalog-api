@@ -4,6 +4,7 @@
   "description": "A well-structured, self-documented, scalable and secured REST API for Pokemon catalog",
   "main": "dist/server.js",
   "author": "Jan Halama",
+  "license": "MIT",
   "engines": {
     "node": ">=20.0.0",
     "yarn": ">=1.0.0"
