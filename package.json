@@ -1,7 +1,7 @@
 {
   "name": "pokemon-catalog-api",
   "version": "1.0.0",
-  "description": "A well-structured, self-documented, scalable and secured REST API for Pokemon catalog",
+  "description": "Pokemon catalog REST API",
   "main": "dist/server.js",
   "author": "Jan Halama",
   "license": "MIT",
