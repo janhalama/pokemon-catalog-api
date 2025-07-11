@@ -3,6 +3,7 @@ export interface HealthStatus {
   timestamp: string;
   uptime: number;
   environment: string;
+  database: string;
 }
 
 export interface HealthResponse {

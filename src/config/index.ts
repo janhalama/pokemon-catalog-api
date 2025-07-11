@@ -5,3 +5,4 @@ export {
   configureRequestLogging,
 } from './fastify';
 export { getEnvironmentConfig, type EnvironmentConfig } from './environment';
+export { getDatabaseConfig } from './database';

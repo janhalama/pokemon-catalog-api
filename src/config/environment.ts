@@ -5,6 +5,14 @@ export function getEnvironmentConfig() {
     PORT: parseInt(process.env.PORT || '3000', 10),
     HOST: process.env.HOST || '0.0.0.0',
 
+    // Database configuration
+    DB_HOST: process.env.DB_HOST || 'localhost',
+    DB_PORT: parseInt(process.env.DB_PORT || '5432', 10),
+    DB_NAME: process.env.DB_NAME || 'pokemon_catalog',
+    DB_USER: process.env.DB_USER || 'postgres',
+    DB_PASSWORD: process.env.DB_PASSWORD || 'postgres',
+    DB_SSL: process.env.DB_SSL === 'true',
+
     // Logging configuration
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
 

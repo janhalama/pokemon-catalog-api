@@ -98,5 +98,8 @@ temp/
 ehthumbs.db
 Thumbs.db
 
+# MikroORM snapshot files
+src/migrations/.snapshot-*.json
+
 # Docs
 docs/

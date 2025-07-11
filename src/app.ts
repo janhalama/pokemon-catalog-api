@@ -1,18 +1,29 @@
 import { FastifyInstance } from 'fastify';
 import { createFastifyServer, configureErrorHandling, configureRequestLogging } from './config/fastify';
 import { registerHealthRoutes } from './routes';
+import { DatabaseService } from './services/database.service';
 
+//Composition root of the application
 export class App {
-  private server: FastifyInstance;
+  private server?: FastifyInstance;
+  private databaseService?: DatabaseService;
 
   constructor() {
-    this.server = null as any;
+    // Properties will be initialized in start() method
   }
 
   async start(): Promise<void> {
     try {
       // Create and configure the server
       this.server = await createFastifyServer();
+      
+      // Initialize database connection with logger function
+      this.databaseService = new DatabaseService((msg: string) => this.server!.log.debug({ component: 'mikroorm' }, msg));
+      await this.databaseService.initialize();
+      await this.databaseService.connect();
+      
+      // Run migrations to ensure database schema is up to date
+      await this.databaseService.runMigrations();
       
       // Configure error handling and logging
       configureErrorHandling(this.server);
@@ -33,8 +44,11 @@ export class App {
   }
 
   private async registerRoutes(): Promise<void> {
+    if (!this.server || !this.databaseService) {
+      throw new Error('Server and database service must be initialized before registering routes');
+    }
     // Register health check routes
-    await registerHealthRoutes(this.server);
+    await registerHealthRoutes(this.server, this.databaseService);
   }
 
   async stop(): Promise<void> {
@@ -42,9 +56,17 @@ export class App {
       await this.server.close();
       this.server.log.info('Server stopped gracefully');
     }
+    
+    // Disconnect from database
+    if (this.databaseService) {
+      await this.databaseService.disconnect();
+    }
   }
 
   getServer(): FastifyInstance {
+    if (!this.server) {
+      throw new Error('Server not initialized. Call start() first.');
+    }
     return this.server;
   }
 } 

@@ -1,11 +1,12 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { HealthService } from '../../services/health.service';
+import { DatabaseService } from '../../services/database.service';
 
 export class HealthController {
   private healthService: HealthService;
 
-  constructor() {
-    this.healthService = new HealthService();
+  constructor(databaseService: DatabaseService) {
+    this.healthService = new HealthService(databaseService);
   }
 
   async getHealthStatus(request: FastifyRequest, reply: FastifyReply) {

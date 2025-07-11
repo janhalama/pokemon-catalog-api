@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+# Install PostgreSQL client tools for database health checks
+RUN apk add --no-cache postgresql-client
+
+WORKDIR /app
+
+# Install MikroORM CLI globally
+RUN yarn global add @mikro-orm/cli
+
+# Install dependencies
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Start the application in development mode
+CMD ["yarn dev"] 

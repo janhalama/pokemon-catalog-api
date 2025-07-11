@@ -11,9 +11,10 @@ export const healthSchemas = {
               status: { type: 'string' },
               timestamp: { type: 'string' },
               uptime: { type: 'number' },
-              environment: { type: 'string' }
+              environment: { type: 'string' },
+              database: { type: 'string' }
             },
-            required: ['status', 'timestamp', 'uptime', 'environment']
+            required: ['status', 'timestamp', 'uptime', 'environment', 'database']
           }
         },
         required: ['success', 'data']
