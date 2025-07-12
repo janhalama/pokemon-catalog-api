@@ -22,9 +22,6 @@ export class App {
       await this.databaseService.initialize();
       await this.databaseService.connect();
       
-      // Run migrations to ensure database schema is up to date
-      await this.databaseService.runMigrations();
-      
       // Configure error handling and logging
       configureErrorHandling(this.server);
       configureRequestLogging(this.server);

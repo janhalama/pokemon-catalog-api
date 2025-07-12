@@ -29,7 +29,7 @@ services:
       - ./yarn.lock:/app/yarn.lock
     depends_on:
       - postgres
-    command: yarn dev
+    command: dev
     networks:
       - pokemon-network
 

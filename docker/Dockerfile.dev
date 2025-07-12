@@ -5,7 +5,7 @@ RUN apk add --no-cache postgresql-client
 
 WORKDIR /app
 
-# Install MikroORM CLI globally
+# Install MikroORM CLI globally, required for migrations
 RUN yarn global add @mikro-orm/cli
 
 # Install dependencies
@@ -15,8 +15,15 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
+# Copy entrypoint script and make it executable
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Expose port
 EXPOSE 3000
 
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
 # Start the application in development mode
-CMD ["yarn dev"] 
+CMD ["dev"] 

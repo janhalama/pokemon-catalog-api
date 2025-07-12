@@ -1,11 +1,14 @@
 import type { HealthStatus } from '../types/health.types';
-import { DatabaseService } from './database.service';
+import type { DatabaseHealthChecker } from '../types/database-health-checker.types';
 
+/**
+ * Provides health status for the application, including database connectivity.
+ */
 export class HealthService {
-  private databaseService: DatabaseService;
+  private database: DatabaseHealthChecker;
 
-  constructor(databaseService: DatabaseService) {
-    this.databaseService = databaseService;
+  constructor(database: DatabaseHealthChecker) {
+    this.database = database;
   }
 
   async getHealthStatus(): Promise<HealthStatus> {
@@ -16,7 +19,7 @@ export class HealthService {
     // Check database connectivity
     let databaseStatus = 'unknown';
     try {
-      const isDatabaseHealthy = await this.databaseService.ping();
+      const isDatabaseHealthy = await this.database.ping();
       databaseStatus = isDatabaseHealthy ? 'connected' : 'disconnected';
     } catch (error) {
       databaseStatus = 'error';
