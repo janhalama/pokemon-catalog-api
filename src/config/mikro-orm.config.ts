@@ -1,6 +1,6 @@
 import { defineConfig } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { User } from './src/entities';
+import { User, Pokemon, Favorite } from '../entities';
 
 export default defineConfig({
   driver: PostgreSqlDriver,
@@ -11,7 +11,7 @@ export default defineConfig({
   password: process.env.DB_PASSWORD || 'postgres',
   
   // Entity discovery
-  entities: [User],
+  entities: [User, Pokemon, Favorite],
   entitiesTs: ['src/entities/**/*.ts'],
   
   // Migration configuration
