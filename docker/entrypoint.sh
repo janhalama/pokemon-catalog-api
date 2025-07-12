@@ -9,7 +9,7 @@ echo "Starting Pokemon Catalog API container..."
 
 wait_for_database() {
   echo "Waiting for database to be ready..."
-  until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
+  until PGPASSWORD=$DB_PASSWORD pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
     echo "Database not ready yet, waiting..."
     sleep 2
   done
@@ -17,13 +17,15 @@ wait_for_database() {
 }
 
 is_pokemon_table_empty() {
-  local count=$(psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM pokemon;" 2>/dev/null || echo "0")
+  echo "Checking if pokemon table is empty..."
+  local count=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM pokemon;" 2>/dev/null | tr -d ' ' || echo "0")
+  echo "Pokemon count: $count"
   [ "$count" = "0" ]
 }
 
 run_migrations() {
   echo "Running database migrations..."
-  yarn migrate
+  cd /app && yarn migrate
 }
 
 auto_seed_pokemon() {
