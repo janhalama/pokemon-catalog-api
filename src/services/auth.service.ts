@@ -3,7 +3,7 @@ import { User } from '../entities/User';
 import { hashPassword, comparePassword } from '../utils/password.utils';
 import { generateToken } from '../utils/jwt.utils';
 import { FastifyInstance } from 'fastify';
-import { ApiError } from '../middleware/error-handler.middleware';
+import { ApiError } from '../utils/api-error.utils';
 import type { CreateUserRequest, LoginRequest, AuthResponse } from '../types/auth.types';
 
 export class AuthService {
@@ -16,7 +16,7 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await this.em.findOne(User, { email: userData.email });
     if (existingUser) {
-      throw new ApiError('User with this email already exists', 400);
+      throw ApiError.badRequest('User with this email already exists');
     }
 
     // Hash password
@@ -54,13 +54,13 @@ export class AuthService {
     // Find user by email
     const user = await this.em.findOne(User, { email: loginData.email });
     if (!user) {
-      throw new ApiError('Invalid email or password', 401);
+      throw ApiError.unauthorized('Invalid email or password');
     }
 
     // Verify password
     const isValidPassword = await comparePassword(loginData.password, user.passwordHash);
     if (!isValidPassword) {
-      throw new ApiError('Invalid email or password', 401);
+      throw ApiError.unauthorized('Invalid email or password');
     }
 
     // Generate JWT token
