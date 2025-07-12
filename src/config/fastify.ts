@@ -6,14 +6,14 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
   const server = fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
-      transport: {
+      transport: process.env.NODE_ENV === 'development' ? {
         target: 'pino-pretty',
         options: {
           colorize: true,
           translateTime: 'HH:MM:ss Z',
           ignore: 'pid,hostname',
         },
-      },
+      } : undefined,
     },
     trustProxy: true,
     disableRequestLogging: false,
