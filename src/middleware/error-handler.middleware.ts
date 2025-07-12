@@ -1,33 +1,8 @@
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
-
-export class ApiError extends Error {
-  public statusCode: number;
-
-  constructor(message: string, statusCode: number = 500) {
-    super(message);
-    this.statusCode = statusCode;
-
-    // Maintains proper stack trace for where our error was thrown
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
+import { ApiError } from '../utils/api-error.utils';
 
 export function isApiError(error: unknown): error is ApiError {
-  if (error instanceof ApiError) {
-    return true;
-  }
-  
-  if (error === null || typeof error !== 'object') {
-    return false;
-  }
-  
-  const errorObj = error as Record<string, unknown>;
-  return (
-    'statusCode' in errorObj &&
-    'message' in errorObj &&
-    typeof errorObj.statusCode === 'number' &&
-    typeof errorObj.message === 'string'
-  );
+  return error instanceof ApiError;
 }
 
 export function errorHandler(
@@ -47,10 +22,7 @@ export function errorHandler(
       .header('Content-Type', 'application/json')
       .send({
         success: false,
-        error: {
-          code: error.statusCode,
-          message: error.message,
-        },
+        error: error.message,
       });
     return;
   }
@@ -68,10 +40,7 @@ export function errorHandler(
     .header('Content-Type', 'application/json')
     .send({
       success: false,
-      error: {
-        code: statusCode,
-        message: responseMessage,
-      },
+      error: responseMessage,
     });
 }
 
@@ -81,11 +50,7 @@ export function notFoundHandler(
 ): void {
   reply.status(404).header('Content-Type', 'application/json').send({
     success: false,
-    error: {
-      code: 404,
-      message: 'Route not found',
-      path: request.url,
-    },
+    error: 'Route not found',
   });
 }
 
@@ -100,10 +65,6 @@ export function validationErrorHandler(
   );
   reply.status(statusCode).header('Content-Type', 'application/json').send({
     success: false,
-    error: {
-      code: statusCode,
-      message: 'Validation failed',
-      details: error.validation || null,
-    },
+    error: 'Validation failed',
   });
 }

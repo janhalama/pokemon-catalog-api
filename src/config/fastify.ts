@@ -1,6 +1,7 @@
 import fastify, { FastifyInstance } from 'fastify';
 import { FastifyError } from '@fastify/error';
-import { errorHandler, notFoundHandler, validationErrorHandler, ApiError } from '../middleware/error-handler.middleware';
+import { errorHandler, notFoundHandler, validationErrorHandler } from '../middleware/error-handler.middleware';
+import { ApiError } from '../utils/api-error.utils';
 import { registerJwtPlugin } from '../plugins/jwt.plugin';
 
 export async function createFastifyServer(): Promise<FastifyInstance> {
