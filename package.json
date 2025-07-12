@@ -26,12 +26,11 @@
     "docker:build": "docker-compose build",
     "docker:setup": "docker-compose run --rm app setup",
     "docker:dev": "docker-compose up",
-    "mikro-orm": "mikro-orm --config src/config/mikro-orm.config.ts",
-    "migrate": "npm run mikro-orm migration:up",
-    "migrate:create": "npm run mikro-orm migration:create",
-    "migrate:down": "npm run mikro-orm migration:down",
-    "migrate:list": "npm run mikro-orm migration:list",
-    "migrate:generate": "npm run mikro-orm migration:create --dump",
+    "migrate": "mikro-orm migration:up --config src/config/mikro-orm.config.ts",
+    "migrate:create": "mikro-orm migration:create --config src/config/mikro-orm.config.ts",
+    "migrate:down": "mikro-orm migration:down --config src/config/mikro-orm.config.ts",
+    "migrate:list": "mikro-orm migration:list --config src/config/mikro-orm.config.ts",
+    "migrate:generate": "mikro-orm migration:create --dump --config src/config/mikro-orm.config.ts",
     "seed:pokemon": "ts-node src/scripts/seed-pokemon.ts"
   },
   "dependencies": {
