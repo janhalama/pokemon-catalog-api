@@ -1,6 +1,7 @@
 import fastify, { FastifyInstance } from 'fastify';
 import { FastifyError } from '@fastify/error';
-import { errorHandler, notFoundHandler, validationErrorHandler } from '../middleware/error-handler.middleware';
+import { errorHandler, notFoundHandler, validationErrorHandler, ApiError } from '../middleware/error-handler.middleware';
+import { registerJwtPlugin } from '../plugins/jwt.plugin';
 
 export async function createFastifyServer(): Promise<FastifyInstance> {
   const server = fastify({
@@ -57,14 +58,17 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
     encodings: ['gzip', 'deflate'],
   });
 
+  // Register JWT plugin for authentication
+  await registerJwtPlugin(server);
+
   return server;
 }
 
 export function configureErrorHandling(server: FastifyInstance): void {
-  server.setErrorHandler((error: FastifyError, request, reply) => {
+  server.setErrorHandler((error: FastifyError | ApiError, request, reply) => {
     // Check if this is a validation error
-    if (error.validation) {
-      return validationErrorHandler(error, request, reply);
+    if ('validation' in error && error.validation) {
+      return validationErrorHandler(error as FastifyError, request, reply);
     }
 
     // Use the dedicated error handler for all other errors

@@ -1,7 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { createFastifyServer, configureErrorHandling, configureRequestLogging } from './config/fastify';
-import { registerHealthRoutes } from './routes';
+import { registerHealthRoutes, registerAuthRoutes } from './routes';
 import { DatabaseService } from './services/database.service';
+import { HealthController } from './routes/health/health.controller';
+import { AuthController } from './routes/auth/auth.controller';
 
 //Composition root of the application
 export class App {
@@ -44,8 +46,15 @@ export class App {
     if (!this.server || !this.databaseService) {
       throw new Error('Server and database service must be initialized before registering routes');
     }
+    
+    // Create controllers
+    const healthController = new HealthController(this.databaseService);
+    const authController = new AuthController(this.databaseService.getEntityManager(), this.server);
+    
     // Register health check routes
-    await registerHealthRoutes(this.server, this.databaseService);
+    await registerHealthRoutes(this.server, healthController);
+    // Register authentication routes
+    await registerAuthRoutes(this.server, authController);
   }
 
   async stop(): Promise<void> {

@@ -11,4 +11,11 @@ export type {
   PokemonListResponse,
   FavoriteResponse,
   FavoriteActionResponse
-} from './pokemon.types'; 
+} from './pokemon.types';
+export type {
+  CreateUserRequest,
+  LoginRequest,
+  AuthResponse,
+  AuthenticatedUser,
+  JwtPayload
+} from './auth.types'; 
