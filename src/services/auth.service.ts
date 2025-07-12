@@ -13,10 +13,8 @@ export class AuthService {
   ) {}
 
   async registerUser(userData: CreateUserRequest): Promise<AuthResponse> {
-    const em = this.em.fork();
-    
     // Check if user already exists
-    const existingUser = await em.findOne(User, { email: userData.email });
+    const existingUser = await this.em.findOne(User, { email: userData.email });
     if (existingUser) {
       throw new ApiError('User with this email already exists', 400);
     }
@@ -25,7 +23,7 @@ export class AuthService {
     const passwordHash = await hashPassword(userData.password);
 
     // Create new user
-    const user = em.create(User, {
+    const user = this.em.create(User, {
       email: userData.email,
       passwordHash,
       name: userData.name,
@@ -33,7 +31,7 @@ export class AuthService {
       updatedAt: new Date(),
     });
 
-    await em.persistAndFlush(user);
+    await this.em.persistAndFlush(user);
 
     // Generate JWT token
     const token = generateToken(this.fastify, {
@@ -53,10 +51,8 @@ export class AuthService {
   }
 
   async loginUser(loginData: LoginRequest): Promise<AuthResponse> {
-    const em = this.em.fork();
-    
     // Find user by email
-    const user = await em.findOne(User, { email: loginData.email });
+    const user = await this.em.findOne(User, { email: loginData.email });
     if (!user) {
       throw new ApiError('Invalid email or password', 401);
     }
@@ -85,12 +81,10 @@ export class AuthService {
   }
 
   async getUserById(userId: number): Promise<User | null> {
-    const em = this.em.fork();
-    return em.findOne(User, { id: userId });
+    return this.em.findOne(User, { id: userId });
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    const em = this.em.fork();
-    return em.findOne(User, { email });
+    return this.em.findOne(User, { email });
   }
 } 

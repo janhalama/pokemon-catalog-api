@@ -4,6 +4,7 @@ import { registerHealthRoutes, registerAuthRoutes } from './routes';
 import { DatabaseService } from './services/database.service';
 import { HealthController } from './routes/health/health.controller';
 import { AuthController } from './routes/auth/auth.controller';
+import { createEntityManagerMiddleware } from './middleware/entity-manager.middleware';
 
 //Composition root of the application
 export class App {
@@ -47,9 +48,13 @@ export class App {
       throw new Error('Server and database service must be initialized before registering routes');
     }
     
+    // Register EntityManager middleware globally
+    const entityManagerMiddleware = createEntityManagerMiddleware(this.databaseService);
+    this.server.addHook('preHandler', entityManagerMiddleware);
+    
     // Create controllers
     const healthController = new HealthController(this.databaseService);
-    const authController = new AuthController(this.databaseService.getEntityManager(), this.server);
+    const authController = new AuthController(this.server);
     
     // Register health check routes
     await registerHealthRoutes(this.server, healthController);
