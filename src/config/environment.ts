@@ -23,6 +23,8 @@ export function getEnvironmentConfig() {
     // Rate limiting configuration
     RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
     RATE_LIMIT_WINDOW: process.env.RATE_LIMIT_WINDOW || '1 minute',
+
+    JWT_SECRET: process.env.JWT_SECRET,
   };
 
   return config;

@@ -5,6 +5,7 @@ import { DatabaseService } from './services/database.service';
 import { HealthController } from './routes/health/health.controller';
 import { AuthController } from './routes/auth/auth.controller';
 import { createEntityManagerMiddleware } from './middleware/entity-manager.middleware';
+import { getEnvironmentConfig } from './config/environment';
 
 //Composition root of the application
 export class App {
@@ -33,8 +34,9 @@ export class App {
       await this.registerRoutes();
 
       // Start the server
-      const port = parseInt(process.env.PORT || '3000', 10);
-      const host = process.env.HOST || '0.0.0.0';
+      const env = getEnvironmentConfig();
+      const port = env.PORT;
+      const host = env.HOST;
 
       await this.server.listen({ port, host });
     } catch (error) {

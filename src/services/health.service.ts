@@ -1,5 +1,6 @@
 import type { HealthStatus } from '../types/health.types';
 import type { DatabaseHealthChecker } from '../types/database-health-checker.types';
+import { getEnvironmentConfig } from '../config/environment';
 
 /**
  * Provides health status for the application, including database connectivity.
@@ -12,9 +13,10 @@ export class HealthService {
   }
 
   async getHealthStatus(): Promise<HealthStatus> {
+    const env = getEnvironmentConfig();
     const uptime = process.uptime();
     const timestamp = new Date().toISOString();
-    const environment = process.env.NODE_ENV || 'development';
+    const environment = env.NODE_ENV;
 
     // Check database connectivity
     let databaseStatus = 'unknown';

@@ -1,10 +1,11 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import pino from 'pino';
+import { getEnvironmentConfig } from './environment';
 
 // Shared logger configuration
 export const loggerConfig = {
-  level: process.env.LOG_LEVEL || 'info',
-  transport: process.env.NODE_ENV === 'development' ? {
+  level: getEnvironmentConfig().LOG_LEVEL,
+  transport: getEnvironmentConfig().NODE_ENV === 'development' ? {
     target: 'pino-pretty',
     options: {
       colorize: true,

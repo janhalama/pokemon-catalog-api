@@ -1,8 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import jwt from '@fastify/jwt';
+import { getEnvironmentConfig } from '../config/environment';
 
 export async function registerJwtPlugin(fastify: FastifyInstance): Promise<void> {
-  const jwtSecret = process.env.JWT_SECRET;
+  const env = getEnvironmentConfig();
+  const jwtSecret = env.JWT_SECRET;
   
   if (!jwtSecret) {
     throw new Error('JWT_SECRET environment variable is required');

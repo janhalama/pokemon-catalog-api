@@ -1,14 +1,17 @@
 import { defineConfig } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { User, Pokemon, Favorite } from '../entities';
+import { getEnvironmentConfig } from './environment';
+
+const env = getEnvironmentConfig();
 
 export default defineConfig({
   driver: PostgreSqlDriver,
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  dbName: process.env.DB_NAME || 'pokemon_catalog',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
+  host: env.DB_HOST,
+  port: env.DB_PORT,
+  dbName: env.DB_NAME,
+  user: env.DB_USER,
+  password: env.DB_PASSWORD,
   
   // Entity discovery
   entities: [User, Pokemon, Favorite],
@@ -40,5 +43,5 @@ export default defineConfig({
   },
   
   // Debug configuration
-  debug: process.env.NODE_ENV === 'development',
+  debug: env.NODE_ENV === 'development',
 }); 

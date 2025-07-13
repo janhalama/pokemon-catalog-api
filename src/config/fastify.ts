@@ -12,8 +12,8 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
   const env = getEnvironmentConfig();
   const server = fastify({
     logger: {
-      level: process.env.LOG_LEVEL || 'info',
-      transport: process.env.NODE_ENV === 'development' ? {
+      level: env.LOG_LEVEL,
+      transport: env.NODE_ENV === 'development' ? {
         target: 'pino-pretty',
         options: {
           colorize: true,
@@ -28,8 +28,8 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
 
   // Register core plugins
   await server.register(import('@fastify/rate-limit'), {
-    max: 100,
-    timeWindow: '1 minute',
+    max: env.RATE_LIMIT_MAX,
+    timeWindow: env.RATE_LIMIT_WINDOW,
     allowList: ['127.0.0.1', '::1'],
     errorResponseBuilder: (request, context) => ({
       code: 429,
@@ -41,9 +41,9 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
 
   // Register CORS for frontend integration
   await server.register(import('@fastify/cors'), {
-    origin: process.env.NODE_ENV === 'development' 
+    origin: env.NODE_ENV === 'development' 
       ? true // Allow all origins in development
-      : process.env.CORS_ORIGIN,
+      : env.CORS_ORIGIN,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],

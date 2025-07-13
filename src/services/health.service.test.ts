@@ -42,7 +42,7 @@ describe('HealthService', () => {
       expect(typeof result.uptime).toBe('number');
     });
 
-    it('should return environment from process.env or default', async () => {
+    it('should return environment from environment config', async () => {
       mockDatabase.ping.mockResolvedValue(true);
       
       const result = await healthService.getHealthStatus();

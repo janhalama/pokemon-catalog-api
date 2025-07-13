@@ -1,5 +1,6 @@
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import { ApiError } from '../utils/api-error.utils';
+import { getEnvironmentConfig } from '../config/environment';
 
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
@@ -33,7 +34,7 @@ export function errorHandler(
   request.log.error(
     `Generic error: ${statusCode} ${message} (${error?.name}) url=${request.url}`
   );
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = getEnvironmentConfig().NODE_ENV === 'development';
   const responseMessage = isDevelopment ? message : 'Internal Server Error';
   reply
     .status(statusCode)
