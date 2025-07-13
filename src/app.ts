@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { createFastifyServer, configureErrorHandling, configureRequestLogging } from './config/fastify';
-import { registerHealthRoutes, registerAuthRoutes } from './routes';
+import { registerHealthRoutes, registerAuthRoutes, registerPokemonRoutes } from './routes';
 import { DatabaseService } from './services/database.service';
 import { HealthController } from './routes/health/health.controller';
 import { AuthController } from './routes/auth/auth.controller';
@@ -60,6 +60,8 @@ export class App {
     await registerHealthRoutes(this.server, healthController);
     // Register authentication routes
     await registerAuthRoutes(this.server, authController);
+    // Register Pokemon routes
+    await registerPokemonRoutes(this.server);
   }
 
   async stop(): Promise<void> {

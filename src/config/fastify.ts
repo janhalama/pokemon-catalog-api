@@ -53,11 +53,11 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
     },
   });
 
-  // Register compression for better performance
-  await server.register(import('@fastify/compress'), {
-    threshold: 1024,
-    encodings: ['gzip', 'deflate'],
-  });
+  // Compression disabled due to Fastify v5 + @fastify/compress v8 bug
+  // See: https://github.com/fastify/fastify-compress/issues/350
+  // await server.register(import('@fastify/compress'), {
+  //   threshold: 1024
+  // });
 
   // Register JWT plugin for authentication
   await registerJwtPlugin(server);
