@@ -6,7 +6,8 @@ import {
   pokemonByIdSchema,
   addToFavoritesSchema,
   removeFromFavoritesSchema,
-  checkFavoriteStatusSchema
+  checkFavoriteStatusSchema,
+  pokemonTypesSchema
 } from './pokemon.schemas';
 
 export async function registerPokemonRoutes(
@@ -47,5 +48,12 @@ export async function registerPokemonRoutes(
     schema: checkFavoriteStatusSchema,
     preHandler: authenticate,
     handler: pokemonController.checkFavoriteStatus.bind(pokemonController)
+  });
+
+  // Get Pokemon types list
+  fastify.get('/api/pokemon/types', {
+    schema: pokemonTypesSchema,
+    preHandler: authenticate,
+    handler: pokemonController.getPokemonTypes.bind(pokemonController)
   });
 } 

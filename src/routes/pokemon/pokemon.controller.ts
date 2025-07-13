@@ -194,6 +194,20 @@ export class PokemonController {
     });
   }
 
+  async getPokemonTypes(
+    request: FastifyRequest, 
+    reply: FastifyReply
+  ): Promise<void> {
+    const entityManager = this.getEntityManagerFromRequest(request);
+    const pokemonService = new PokemonService(entityManager);
+    const types: string[] = await pokemonService.getPokemonTypes();
+
+    reply.send({
+      success: true,
+      data: types
+    });
+  }
+
   private getEntityManagerFromRequest(request: FastifyRequest): EntityManager {
     if (!request.entityManager) {
       throw new Error('EntityManager not available in request context');

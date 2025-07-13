@@ -18,6 +18,7 @@ export class Pokemon {
   @Property({ length: 100 })
   classification!: string;
 
+  @Index({ name: 'pokemon_types_gin_idx', type: 'gin', options: { using: 'gin' } })
   @Property({ type: 'json' })
   types!: string[];
 

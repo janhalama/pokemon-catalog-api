@@ -177,6 +177,19 @@ export class PokemonService {
     return !!favorite;
   }
 
+  async getPokemonTypes(): Promise<string[]> {
+    const result = await this.em.getConnection().execute(`
+      SELECT DISTINCT jsonb_array_elements_text(types) as type
+      FROM pokemon 
+      WHERE types IS NOT NULL 
+        AND jsonb_array_length(types) > 0
+      ORDER BY type
+    `);
+    
+    // Extract the type values from the result
+    return result.map((row: { type: string }) => row.type);
+  }
+
   private mapToPokemonData(pokemon: Pokemon): PokemonData {
     return {
       id: pokemon.externalId,

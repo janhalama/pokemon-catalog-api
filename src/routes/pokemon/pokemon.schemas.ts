@@ -308,3 +308,31 @@ export const checkFavoriteStatusSchema = {
   params: pokemonByIdParamsSchema,
   response: createResponseSchema(createSuccessResponseSchema(favoriteResponseSchema))
 } as FastifySchema;
+
+// Pokemon types endpoint schema
+export const pokemonTypesSchema = {
+  description: 'Get a list of all unique Pokemon types available in the database',
+  tags: ['Pokemon'],
+  summary: 'Get Pokemon types list',
+  response: {
+    200: {
+      description: 'List of Pokemon types',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of unique Pokemon types'
+              }
+            },
+            required: ['success', 'data']
+          }
+        }
+      }
+    }
+  }
+} as FastifySchema;
