@@ -23,7 +23,16 @@ export async function authenticate(
       return;
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    // Validate Bearer scheme
+    if (!authHeader.startsWith('Bearer ')) {
+      reply.status(401).send({
+        success: false,
+        error: 'Authorization header must use Bearer scheme',
+      });
+      return;
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
     if (!token) {
       reply.status(401).send({
