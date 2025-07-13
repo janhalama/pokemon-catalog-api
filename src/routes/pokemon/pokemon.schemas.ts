@@ -19,7 +19,14 @@ export const pokemonListQuerySchema = {
       type: 'string',
       minLength: 1,
       maxLength: 100,
-      description: 'Search query for Pokemon names'
+      description: 'Fuzzy search query for Pokemon names (returns list of matches)'
+    },
+    name: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      pattern: '^[a-zA-Z0-9\\s-]+$',
+      description: 'Exact Pokemon name (returns single Pokemon, 404 if not found)'
     },
     type: {
       type: 'string',
@@ -214,11 +221,56 @@ const favoriteActionResponseSchema = {
 
 // Pokemon list endpoint schema
 export const pokemonListSchema = {
-  description: 'Get a paginated list of Pokemon with optional search and filtering',
+  description: `Get Pokemon with flexible search options:
+  
+  - **No parameters**: Returns paginated list of all Pokemon
+  - **name parameter**: Returns single Pokemon object by exact name (404 if not found)
+  - **q parameter**: Returns list of Pokemon matching fuzzy search
+  - **type parameter**: Filters by Pokemon type
+  - **favorites parameter**: Shows only user favorites
+  
+  Note: 'name' and 'q' parameters serve different purposes - 'name' for exact matches, 'q' for fuzzy search.
+  Response format: Single Pokemon object when using 'name' parameter, paginated list otherwise.`,
   tags: ['Pokemon'],
-  summary: 'Get Pokemon list',
+  summary: 'Get Pokemon list or search by exact/fuzzy name',
   querystring: pokemonListQuerySchema,
-  response: createResponseSchema(createSuccessResponseSchema(pokemonListResponseSchema))
+  response: {
+    200: {
+      description: 'Pokemon found',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                oneOf: [
+                  pokemonDataSchema,           // Single Pokemon when using 'name' parameter
+                  pokemonListResponseSchema    // Paginated list for other cases
+                ]
+              }
+            },
+            required: ['success', 'data']
+          }
+        }
+      }
+    },
+    404: {
+      description: 'Pokemon not found (when using exact name search)',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              error: { type: 'string' }
+            },
+            required: ['success', 'error']
+          }
+        }
+      }
+    }
+  }
 } as FastifySchema;
 
 // Pokemon by ID endpoint schema
@@ -255,4 +307,4 @@ export const checkFavoriteStatusSchema = {
   summary: 'Check favorite status',
   params: pokemonByIdParamsSchema,
   response: createResponseSchema(createSuccessResponseSchema(favoriteResponseSchema))
-} as FastifySchema; 
+} as FastifySchema;

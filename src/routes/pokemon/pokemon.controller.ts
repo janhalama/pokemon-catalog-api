@@ -25,12 +25,13 @@ interface PokemonListRoute {
     page?: string;
     limit?: string;
     q?: string;
+    name?: string;
     type?: string;
     favorites?: string;
   };
   Reply: {
     success: boolean;
-    data: PokemonListResponse;
+    data: PokemonListResponse | PokemonData;
   };
 }
 
@@ -59,9 +60,26 @@ export class PokemonController {
     request: FastifyRequest<PokemonListRoute>, 
     reply: FastifyReply<PokemonListRoute>
   ): Promise<void> {
-    const { page, limit, q, type, favorites } = request.query;
+    const { page, limit, q, name, type, favorites } = request.query;
     const userId = request.authenticatedUser?.id;
 
+    const entityManager = this.getEntityManagerFromRequest(request);
+    const pokemonService = new PokemonService(entityManager);
+
+    // Handle exact name search directly
+    if (name) {
+      const pokemon = await pokemonService.getPokemonByName(name);
+      if (!pokemon) {
+        throw ApiError.notFound('Pokemon not found');
+      }
+      reply.send({
+        success: true,
+        data: pokemon
+      });
+      return;
+    }
+
+    // Handle list/search functionality
     const options: PokemonListOptions = {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
@@ -71,8 +89,6 @@ export class PokemonController {
       userId
     };
 
-    const entityManager = this.getEntityManagerFromRequest(request);
-    const pokemonService = new PokemonService(entityManager);
     const result: PokemonListResponse = await pokemonService.getPokemonList(options);
 
     reply.send({

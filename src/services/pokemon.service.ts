@@ -94,6 +94,22 @@ export class PokemonService {
     return pokemon ? this.mapToPokemonData(pokemon) : null;
   }
 
+  async getPokemonByName(name: string): Promise<PokemonData | null> {
+    // Use exact case-insensitive match
+    const pokemon = await this.em.findOne(Pokemon, { 
+      name: { $ilike: name.toLowerCase() } 
+    }, { 
+      orderBy: { name: 'ASC' } // Consistent ordering
+    });
+    
+    // Verify exact match
+    if (pokemon && pokemon.name.toLowerCase() === name.toLowerCase()) {
+      return this.mapToPokemonData(pokemon);
+    }
+    
+    return null;
+  }
+
   async addToFavorites(userId: number, externalPokemonId: string): Promise<void> {
     // Check if Pokemon exists
     const pokemon = await this.em.findOne(Pokemon, { externalId: externalPokemonId });
