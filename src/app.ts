@@ -38,7 +38,14 @@ export class App {
       const port = env.PORT;
       const host = env.HOST;
 
-      await this.server.listen({ port, host });
+      const address = await this.server.listen({ port, host });
+      
+      // Log important URLs
+      const serverUrl = address;
+      this.server.log.info(`Server started successfully!`);
+      this.server.log.info(`API Base URL: ${serverUrl}/api`);
+      this.server.log.info(`Swagger Documentation: ${serverUrl}/api/docs`);
+      this.server.log.info(`Health Check: ${serverUrl}/api/health`);
     } catch (error) {
       console.error('Failed to start server:', error);
       process.exit(1);
