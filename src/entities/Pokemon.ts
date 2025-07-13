@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property, Index } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, Index, OneToMany } from '@mikro-orm/core';
+import { Favorite } from './Favorite';
 
 @Entity({ tableName: 'pokemon' })
 @Index({ properties: ['name'] })
@@ -74,4 +75,7 @@ export class Pokemon {
 
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
+
+  @OneToMany(() => Favorite, favorite => favorite.pokemon)
+  favorites?: Favorite[];
 } 

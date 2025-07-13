@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, ManyToOne, Unique, Index, Cascade } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, Unique, Index } from '@mikro-orm/core';
 import { User } from './User';
 import { Pokemon } from './Pokemon';
 
@@ -10,10 +10,10 @@ export class Favorite {
   @PrimaryKey()
   id!: number;
 
-  @ManyToOne(() => User, { cascade: [Cascade.REMOVE] })
+  @ManyToOne(() => User)
   user!: User;
 
-  @ManyToOne(() => Pokemon, { cascade: [Cascade.REMOVE] })
+  @ManyToOne(() => Pokemon)
   pokemon!: Pokemon;
 
   @Property()

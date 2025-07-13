@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, Unique, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, Unique, OneToMany, Collection, Cascade } from '@mikro-orm/core';
 import { Favorite } from './Favorite';
 
 @Entity({ tableName: 'users' })
@@ -16,7 +16,7 @@ export class User {
   @Property({ length: 100 })
   name!: string;
 
-  @OneToMany(() => Favorite, favorite => favorite.user)
+  @OneToMany(() => Favorite, favorite => favorite.user, { cascade: [Cascade.REMOVE] })
   favorites = new Collection<Favorite>(this);
 
   @Property()
