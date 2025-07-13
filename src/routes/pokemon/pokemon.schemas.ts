@@ -1,5 +1,5 @@
 import { FastifySchema } from 'fastify';
-import { createResponseSchema, createSuccessResponseSchema, createMessageResponseSchema } from '../../utils/schema.utils';
+import { createResponseSchema, createSuccessResponseSchema } from '../../utils/schema.utils';
 
 // Pokemon list query parameters schema
 export const pokemonListQuerySchema = {
@@ -44,7 +44,7 @@ export const pokemonByIdParamsSchema = {
   properties: {
     id: {
       type: 'string',
-      pattern: '^[1-9]\\d*$',
+      pattern: '^[0-9]\\d*$',
       description: 'Pokemon ID (must be positive integer)'
     }
   },
@@ -191,8 +191,6 @@ const pokemonListResponseSchema = {
   additionalProperties: false
 };
 
-
-
 // Favorite response schema
 const favoriteResponseSchema = {
   type: 'object',
@@ -200,6 +198,17 @@ const favoriteResponseSchema = {
     isFavorite: { type: 'boolean' }
   },
   required: ['isFavorite'],
+  additionalProperties: false
+};
+
+// Favorite action response schema
+const favoriteActionResponseSchema = {
+  type: 'object',
+  properties: {
+    success: { type: 'boolean' },
+    message: { type: 'string' }
+  },
+  required: ['success', 'message'],
   additionalProperties: false
 };
 
@@ -227,7 +236,7 @@ export const addToFavoritesSchema = {
   tags: ['Favorites'],
   summary: 'Add Pokemon to favorites',
   params: pokemonByIdParamsSchema,
-  response: createResponseSchema(createMessageResponseSchema())
+  response: createResponseSchema(createSuccessResponseSchema(favoriteActionResponseSchema))
 } as FastifySchema;
 
 // Remove from favorites endpoint schema
@@ -236,7 +245,7 @@ export const removeFromFavoritesSchema = {
   tags: ['Favorites'],
   summary: 'Remove Pokemon from favorites',
   params: pokemonByIdParamsSchema,
-  response: createResponseSchema(createMessageResponseSchema())
+  response: createResponseSchema(createSuccessResponseSchema(favoriteActionResponseSchema))
 } as FastifySchema;
 
 // Check favorite status endpoint schema
@@ -245,5 +254,5 @@ export const checkFavoriteStatusSchema = {
   tags: ['Favorites'],
   summary: 'Check favorite status',
   params: pokemonByIdParamsSchema,
-  response: createResponseSchema(favoriteResponseSchema)
+  response: createResponseSchema(createSuccessResponseSchema(favoriteResponseSchema))
 } as FastifySchema; 
