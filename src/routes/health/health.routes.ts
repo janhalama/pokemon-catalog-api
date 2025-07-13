@@ -6,7 +6,7 @@ export async function registerHealthRoutes(
   server: FastifyInstance, 
   healthController: HealthController
 ): Promise<void> {
-  server.get('/health', {
+  server.get('/api/health', {
     schema: healthSchemas.getHealth
   }, healthController.getHealthStatus.bind(healthController));
 } 
