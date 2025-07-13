@@ -4,9 +4,13 @@ import { Favorite } from './Favorite';
 @Entity({ tableName: 'pokemon' })
 @Index({ properties: ['name'] })
 @Index({ properties: ['types'] })
+@Index({ properties: ['externalId'] })
 export class Pokemon {
   @PrimaryKey()
-  id!: string;
+  id!: number;
+
+  @Property({ length: 50, unique: true })
+  externalId!: string;
 
   @Property({ length: 100 })
   name!: string;

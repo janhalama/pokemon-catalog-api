@@ -6,7 +6,7 @@ import { ApiError } from '../utils/api-error.utils';
 import type { PokemonListOptions, PokemonListResponse, PokemonData } from '../types/pokemon.types';
 
 type PokemonWhereConditions = {
-  id?: string | { $in: string[] };
+  id?: number | { $in: number[] };
   name?: { $ilike: string };
   types?: { $contains: string[] };
 };
@@ -89,16 +89,16 @@ export class PokemonService {
     };
   }
 
-  async getPokemonById(id: string): Promise<PokemonData | null> {
-    const pokemon = await this.em.findOne(Pokemon, { id });
+  async getPokemonById(externalId: string): Promise<PokemonData | null> {
+    const pokemon = await this.em.findOne(Pokemon, { externalId });
     return pokemon ? this.mapToPokemonData(pokemon) : null;
   }
 
-  async addToFavorites(userId: number, pokemonId: string): Promise<void> {
+  async addToFavorites(userId: number, externalPokemonId: string): Promise<void> {
     // Check if Pokemon exists
-    const pokemon = await this.em.findOne(Pokemon, { id: pokemonId });
+    const pokemon = await this.em.findOne(Pokemon, { externalId: externalPokemonId });
     if (!pokemon) {
-      throw ApiError.notFound(`Pokemon with ID ${pokemonId} not found`);
+      throw ApiError.notFound(`Pokemon with ID ${externalPokemonId} not found`);
     }
 
     // Check if user exists
@@ -110,7 +110,7 @@ export class PokemonService {
     // Check if favorite already exists
     const existingFavorite = await this.em.findOne(Favorite, {
       user: { id: userId },
-      pokemon: { id: pokemonId }
+      pokemon: { id: pokemon.id }
     });
 
     if (existingFavorite) {
@@ -125,10 +125,17 @@ export class PokemonService {
     await this.em.persistAndFlush(favorite);
   }
 
-  async removeFromFavorites(userId: number, pokemonId: string): Promise<void> {
+  async removeFromFavorites(userId: number, externalPokemonId: string): Promise<void> {
+    // Check if Pokemon exists
+    const pokemon = await this.em.findOne(Pokemon, { externalId: externalPokemonId });
+    if (!pokemon) {
+      throw ApiError.notFound(`Pokemon with ID ${externalPokemonId} not found`);
+    }
+
+    // Find and remove favorite
     const favorite = await this.em.findOne(Favorite, {
       user: { id: userId },
-      pokemon: { id: pokemonId }
+      pokemon: { id: pokemon.id }
     });
 
     if (!favorite) {
@@ -138,10 +145,17 @@ export class PokemonService {
     await this.em.removeAndFlush(favorite);
   }
 
-  async checkFavoriteStatus(userId: number, pokemonId: string): Promise<boolean> {
+  async checkFavoriteStatus(userId: number, externalPokemonId: string): Promise<boolean> {
+    // Check if Pokemon exists
+    const pokemon = await this.em.findOne(Pokemon, { externalId: externalPokemonId });
+    if (!pokemon) {
+      throw ApiError.notFound(`Pokemon with ID ${externalPokemonId} not found`);
+    }
+
+    // Check if favorite exists
     const favorite = await this.em.findOne(Favorite, {
       user: { id: userId },
-      pokemon: { id: pokemonId }
+      pokemon: { id: pokemon.id }
     });
 
     return !!favorite;
@@ -149,7 +163,7 @@ export class PokemonService {
 
   private mapToPokemonData(pokemon: Pokemon): PokemonData {
     return {
-      id: pokemon.id,
+      id: pokemon.externalId,
       name: pokemon.name,
       classification: pokemon.classification,
       types: pokemon.types,

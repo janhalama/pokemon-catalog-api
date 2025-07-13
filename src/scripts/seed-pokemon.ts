@@ -76,7 +76,7 @@ async function seedPokemon(options: { shouldCloseOrm?: boolean } = {}): Promise<
     // Create Pokemon entities
     const pokemonEntities = pokemonData.map(data => {
       const pokemon = new Pokemon();
-      pokemon.id = data.id;
+      pokemon.externalId = data.id;
       pokemon.name = data.name;
       pokemon.classification = data.classification;
       pokemon.types = data.types;
