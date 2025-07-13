@@ -4,6 +4,7 @@ export function getEnvironmentConfig() {
     NODE_ENV: process.env.NODE_ENV || 'development',
     PORT: parseInt(process.env.PORT || '3000', 10),
     HOST: process.env.HOST || '0.0.0.0',
+    API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:3000',
 
     // Database configuration
     DB_HOST: process.env.DB_HOST || 'localhost',

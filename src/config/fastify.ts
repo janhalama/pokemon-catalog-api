@@ -3,8 +3,13 @@ import { FastifyError } from '@fastify/error';
 import { errorHandler, notFoundHandler, validationErrorHandler } from '../middleware/error-handler.middleware';
 import { ApiError } from '../utils/api-error.utils';
 import { registerJwtPlugin } from '../plugins/jwt.plugin';
+import { swaggerConfig } from '../plugins/swagger.plugin';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
+import { getEnvironmentConfig } from './environment';
 
 export async function createFastifyServer(): Promise<FastifyInstance> {
+  const env = getEnvironmentConfig();
   const server = fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
@@ -36,9 +41,13 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
 
   // Register CORS for frontend integration
   await server.register(import('@fastify/cors'), {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.NODE_ENV === 'development' 
+      ? true // Allow all origins in development
+      : process.env.CORS_ORIGIN,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+    exposedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Register security headers
@@ -46,6 +55,7 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
+        connectSrc: ["'self'", env.API_BASE_URL],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", 'data:', 'https:'],
@@ -61,6 +71,22 @@ export async function createFastifyServer(): Promise<FastifyInstance> {
 
   // Register JWT plugin for authentication
   await registerJwtPlugin(server);
+
+  // Register Swagger OpenAPI plugin for API documentation (before routes)
+  await server.register(swagger, swaggerConfig);
+
+  // Register Swagger UI plugin for API documentation (before routes)
+  await server.register(swaggerUi, {
+    routePrefix: '/api/docs',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: true,
+      displayRequestDuration: true,
+      filter: true,
+      showExtensions: true,
+      showCommonExtensions: true
+    }
+  });
 
   return server;
 }

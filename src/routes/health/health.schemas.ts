@@ -15,6 +15,8 @@ const healthResponseDataSchema = {
 
 export const healthSchemas = {
   getHealth: {
+    description: 'Get API health status',
+    tags: ['health'],
     response: createResponseSchema(createSuccessResponseSchema(healthResponseDataSchema))
   }
 }; 
