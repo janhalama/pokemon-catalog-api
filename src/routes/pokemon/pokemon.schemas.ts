@@ -1,223 +1,117 @@
-import { FastifySchema } from 'fastify';
-import { createResponseSchema, createSuccessResponseSchema } from '../../utils/schema.utils';
+import { Type } from '@sinclair/typebox';
+import { createResponseSchema } from '../../utils/schema.utils';
+import { Static } from '@sinclair/typebox';
 
 // Pokemon list query parameters schema
-export const pokemonListQuerySchema = {
-  type: 'object',
-  properties: {
-    page: {
-      type: 'string',
-      pattern: '^[1-9]\\d*$',
-      description: 'Page number (must be positive integer)'
-    },
-    limit: {
-      type: 'string',
-      pattern: '^[1-9]\\d*$',
-      description: 'Number of items per page (1-100)'
-    },
-    q: {
-      type: 'string',
-      minLength: 1,
-      maxLength: 100,
-      description: 'Fuzzy search query for Pokemon names (returns list of matches)'
-    },
-    name: {
-      type: 'string',
-      minLength: 1,
-      maxLength: 100,
-      pattern: '^[a-zA-Z0-9\\s-]+$',
-      description: 'Exact Pokemon name (returns single Pokemon, 404 if not found)'
-    },
-    type: {
-      type: 'string',
-      enum: [
-        'Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison',
-        'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
-      ],
-      description: 'Filter by Pokemon type'
-    },
-    favorites: {
-      type: 'string',
-      enum: ['true', 'false'],
-      description: 'Filter to show only user favorites'
-    }
-  },
-  additionalProperties: false
-};
+export const pokemonListQuerySchema = Type.Object({
+  page: Type.Optional(Type.String({ pattern: '^[1-9]\\d*$', description: 'Page number (must be positive integer)' })),
+  limit: Type.Optional(Type.String({ pattern: '^[1-9]\\d*$', description: 'Number of items per page (1-100)' })),
+  q: Type.Optional(Type.String({ minLength: 1, maxLength: 100, description: 'Fuzzy search query for Pokemon names (returns list of matches)' })),
+  name: Type.Optional(Type.String({ minLength: 1, maxLength: 100, pattern: '^[a-zA-Z0-9\\s-]+$', description: 'Exact Pokemon name (returns single Pokemon, 404 if not found)' })),
+  type: Type.Optional(Type.String({ description: 'Filter by Pokemon type (e.g., "Fire", "Water", "Grass")' })),
+  favorites: Type.Optional(Type.String({ description: 'Filter to show only user favorites (use "true" or "false")' }))
+});
 
-// Pokemon by ID path parameters schema
-export const pokemonByIdParamsSchema = {
-  type: 'object',
-  properties: {
-    id: {
-      type: 'string',
-      pattern: '^[0-9]\\d*$',
-      description: 'Pokemon ID (must be positive integer)'
-    }
-  },
-  required: ['id'],
-  additionalProperties: false
-};
+export interface PokemonListRoute {
+  Querystring: Static<typeof pokemonListQuerySchema>;
+  Reply: {
+    success: boolean;
+    data: Static<typeof pokemonDataSchema> | Static<typeof pokemonListResponseSchema>;
+  };
+}
+
+// Pokemon by ID params schema
+export const pokemonByIdParamsSchema = Type.Object({
+  id: Type.String({ description: 'Pokemon ID' })
+});
+
+export interface PokemonByIdRoute {
+  Params: Static<typeof pokemonByIdParamsSchema>;
+  Reply: {
+    success: boolean;
+    data: Static<typeof pokemonDataSchema>;
+  };
+}
 
 // Pokemon attack schema
-const pokemonAttackSchema = {
-  type: 'object',
-  properties: {
-    name: { type: 'string' },
-    type: { type: 'string' },
-    damage: { type: 'number' }
-  },
-  required: ['name', 'type', 'damage'],
-  additionalProperties: false
-};
+const pokemonAttackSchema = Type.Object({
+  name: Type.String(),
+  type: Type.String(),
+  damage: Type.Number()
+});
 
 // Pokemon attacks schema
-const pokemonAttacksSchema = {
-  type: 'object',
-  properties: {
-    fast: {
-      type: 'array',
-      items: pokemonAttackSchema
-    },
-    special: {
-      type: 'array',
-      items: pokemonAttackSchema
-    }
-  },
-  required: ['fast', 'special'],
-  additionalProperties: false
-};
+const pokemonAttacksSchema = Type.Object({
+  fast: Type.Array(pokemonAttackSchema),
+  special: Type.Array(pokemonAttackSchema)
+});
 
 // Pokemon evolution schema
-const pokemonEvolutionSchema = {
-  type: 'object',
-  properties: {
-    id: { type: 'number' },
-    name: { type: 'string' }
-  },
-  required: ['id', 'name'],
-  additionalProperties: false
-};
+const pokemonEvolutionSchema = Type.Object({
+  id: Type.Number(),
+  name: Type.String()
+});
 
 // Pokemon evolution requirements schema
-const pokemonEvolutionRequirementsSchema = {
-  type: 'object',
-  properties: {
-    amount: { type: 'number' },
-    name: { type: 'string' }
-  },
-  required: ['amount', 'name'],
-  additionalProperties: false
-};
+const pokemonEvolutionRequirementsSchema = Type.Object({
+  amount: Type.Number(),
+  name: Type.String()
+});
 
 // Pokemon weight schema
-const pokemonWeightSchema = {
-  type: 'object',
-  properties: {
-    minimum: { type: 'string' },
-    maximum: { type: 'string' }
-  },
-  required: ['minimum', 'maximum'],
-  additionalProperties: false
-};
+const pokemonWeightSchema = Type.Object({
+  minimum: Type.String(),
+  maximum: Type.String()
+});
 
 // Pokemon height schema
-const pokemonHeightSchema = {
-  type: 'object',
-  properties: {
-    minimum: { type: 'string' },
-    maximum: { type: 'string' }
-  },
-  required: ['minimum', 'maximum'],
-  additionalProperties: false
-};
+const pokemonHeightSchema = Type.Object({
+  minimum: Type.String(),
+  maximum: Type.String()
+});
 
 // Individual Pokemon data schema
-const pokemonDataSchema = {
-  type: 'object',
-  properties: {
-    id: { type: 'string' },
-    name: { type: 'string' },
-    classification: { type: 'string' },
-    types: {
-      type: 'array',
-      items: { type: 'string' }
-    },
-    resistant: {
-      type: 'array',
-      items: { type: 'string' }
-    },
-    weaknesses: {
-      type: 'array',
-      items: { type: 'string' }
-    },
-    weight: pokemonWeightSchema,
-    height: pokemonHeightSchema,
-    fleeRate: { type: 'number' },
-    evolutionRequirements: pokemonEvolutionRequirementsSchema,
-    evolutions: {
-      type: 'array',
-      items: pokemonEvolutionSchema
-    },
-    maxCP: { type: 'number' },
-    maxHP: { type: 'number' },
-    attacks: pokemonAttacksSchema
-  },
-  required: [
-    'id', 'name', 'classification', 'types', 'resistant', 'weaknesses',
-    'weight', 'height', 'fleeRate', 'evolutionRequirements', 'evolutions',
-    'maxCP', 'maxHP', 'attacks'
-  ],
-  additionalProperties: false
-};
+export const pokemonDataSchema = Type.Object({
+  id: Type.String(),
+  name: Type.String(),
+  classification: Type.String(),
+  types: Type.Array(Type.String()),
+  resistant: Type.Array(Type.String()),
+  weaknesses: Type.Array(Type.String()),
+  weight: pokemonWeightSchema,
+  height: pokemonHeightSchema,
+  fleeRate: Type.Number(),
+  evolutionRequirements: pokemonEvolutionRequirementsSchema,
+  evolutions: Type.Array(pokemonEvolutionSchema),
+  maxCP: Type.Number(),
+  maxHP: Type.Number(),
+  attacks: pokemonAttacksSchema
+});
 
 // Pagination schema
-const paginationSchema = {
-  type: 'object',
-  properties: {
-    page: { type: 'number' },
-    limit: { type: 'number' },
-    total: { type: 'number' },
-    totalPages: { type: 'number' }
-  },
-  required: ['page', 'limit', 'total', 'totalPages'],
-  additionalProperties: false
-};
+const paginationSchema = Type.Object({
+  page: Type.Number(),
+  limit: Type.Number(),
+  total: Type.Number(),
+  totalPages: Type.Number()
+});
 
 // Pokemon list response schema
-const pokemonListResponseSchema = {
-  type: 'object',
-  properties: {
-    pokemon: {
-      type: 'array',
-      items: pokemonDataSchema
-    },
-    pagination: paginationSchema
-  },
-  required: ['pokemon', 'pagination'],
-  additionalProperties: false
-};
+export const pokemonListResponseSchema = Type.Object({
+  pokemon: Type.Array(pokemonDataSchema),
+  pagination: paginationSchema
+});
 
 // Favorite response schema
-const favoriteResponseSchema = {
-  type: 'object',
-  properties: {
-    isFavorite: { type: 'boolean' }
-  },
-  required: ['isFavorite'],
-  additionalProperties: false
-};
+export const favoriteResponseSchema = Type.Object({
+  isFavorite: Type.Boolean()
+});
 
 // Favorite action response schema
-const favoriteActionResponseSchema = {
-  type: 'object',
-  properties: {
-    success: { type: 'boolean' },
-    message: { type: 'string' }
-  },
-  required: ['success', 'message'],
-  additionalProperties: false
-};
+export const favoriteActionResponseSchema = Type.Object({
+  success: Type.Boolean(),
+  message: Type.String()
+});
 
 // Pokemon list endpoint schema
 export const pokemonListSchema = {
@@ -239,19 +133,10 @@ export const pokemonListSchema = {
       description: 'Pokemon found',
       content: {
         'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              data: {
-                oneOf: [
-                  pokemonDataSchema,           // Single Pokemon when using 'name' parameter
-                  pokemonListResponseSchema    // Paginated list for other cases
-                ]
-              }
-            },
-            required: ['success', 'data']
-          }
+          schema: Type.Object({
+            success: Type.Boolean(),
+            data: Type.Union([pokemonDataSchema, pokemonListResponseSchema])
+          })
         }
       }
     },
@@ -259,19 +144,15 @@ export const pokemonListSchema = {
       description: 'Pokemon not found (when using exact name search)',
       content: {
         'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              error: { type: 'string' }
-            },
-            required: ['success', 'error']
-          }
+          schema: Type.Object({
+            success: Type.Boolean(),
+            error: Type.String()
+          })
         }
       }
     }
   }
-} as FastifySchema;
+};
 
 // Pokemon by ID endpoint schema
 export const pokemonByIdSchema = {
@@ -279,8 +160,8 @@ export const pokemonByIdSchema = {
   tags: ['Pokemon'],
   summary: 'Get Pokemon by ID',
   params: pokemonByIdParamsSchema,
-  response: createResponseSchema(createSuccessResponseSchema(pokemonDataSchema))
-} as FastifySchema;
+  response: createResponseSchema(pokemonDataSchema)
+};
 
 // Add to favorites endpoint schema
 export const addToFavoritesSchema = {
@@ -288,8 +169,8 @@ export const addToFavoritesSchema = {
   tags: ['Favorites'],
   summary: 'Add Pokemon to favorites',
   params: pokemonByIdParamsSchema,
-  response: createResponseSchema(createSuccessResponseSchema(favoriteActionResponseSchema))
-} as FastifySchema;
+  response: createResponseSchema(favoriteActionResponseSchema)
+};
 
 // Remove from favorites endpoint schema
 export const removeFromFavoritesSchema = {
@@ -297,8 +178,8 @@ export const removeFromFavoritesSchema = {
   tags: ['Favorites'],
   summary: 'Remove Pokemon from favorites',
   params: pokemonByIdParamsSchema,
-  response: createResponseSchema(createSuccessResponseSchema(favoriteActionResponseSchema))
-} as FastifySchema;
+  response: createResponseSchema(favoriteActionResponseSchema)
+};
 
 // Check favorite status endpoint schema
 export const checkFavoriteStatusSchema = {
@@ -306,8 +187,8 @@ export const checkFavoriteStatusSchema = {
   tags: ['Favorites'],
   summary: 'Check favorite status',
   params: pokemonByIdParamsSchema,
-  response: createResponseSchema(createSuccessResponseSchema(favoriteResponseSchema))
-} as FastifySchema;
+  response: createResponseSchema(favoriteResponseSchema)
+};
 
 // Pokemon types endpoint schema
 export const pokemonTypesSchema = {
@@ -319,20 +200,28 @@ export const pokemonTypesSchema = {
       description: 'List of Pokemon types',
       content: {
         'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              data: {
-                type: 'array',
-                items: { type: 'string' },
-                description: 'Array of unique Pokemon types'
-              }
-            },
-            required: ['success', 'data']
-          }
+          schema: Type.Object({
+            success: Type.Boolean(),
+            data: Type.Array(Type.String(), { description: 'Array of unique Pokemon types' })
+          })
         }
       }
     }
   }
-} as FastifySchema;
+};
+
+export interface FavoriteActionRoute {
+  Params: Static<typeof pokemonByIdParamsSchema>;
+  Reply: {
+    success: boolean;
+    data: Static<typeof favoriteActionResponseSchema>;
+  };
+}
+
+export interface FavoriteStatusRoute {
+  Params: Static<typeof pokemonByIdParamsSchema>;
+  Reply: {
+    success: boolean;
+    data: Static<typeof favoriteResponseSchema>;
+  };
+}

@@ -1,95 +1,54 @@
-// Base response schemas
-export const successResponseSchema = {
-  type: 'object',
-  properties: {
-    success: { type: 'boolean' },
-    data: { type: 'object' }
-  },
-  required: ['success', 'data'],
-  additionalProperties: false
+/**
+ * Schema utilities using TypeBox for Fastify
+ * Provides reusable response schemas and helpers for API endpoints.
+ */
+
+import { Type, Static, TSchema } from '@sinclair/typebox';
+
+// Success response schema factory
+export function createSuccessResponseSchema<T extends TSchema>(dataSchema: T) {
+  return Type.Object({
+    success: Type.Literal(true),
+    data: dataSchema
+  });
+}
+
+// Error response schema
+export const ErrorResponseSchema = Type.Object({
+  success: Type.Literal(false),
+  error: Type.String()
+});
+
+// Message response schema
+export const MessageResponseSchema = Type.Object({
+  success: Type.Literal(true),
+  message: Type.String()
+});
+
+// Common error responses map
+export const commonErrorResponses: Record<number, typeof ErrorResponseSchema> = {
+  400: ErrorResponseSchema,
+  401: ErrorResponseSchema,
+  403: ErrorResponseSchema,
+  404: ErrorResponseSchema,
+  409: ErrorResponseSchema,
+  422: ErrorResponseSchema,
+  500: ErrorResponseSchema
 };
 
-export const errorResponseSchema = {
-  type: 'object',
-  properties: {
-    success: { type: 'boolean' },
-    error: { type: 'string' }
-  },
-  required: ['success', 'error'],
-  additionalProperties: false
-};
-
-export const messageResponseSchema = {
-  type: 'object',
-  properties: {
-    success: { type: 'boolean' },
-    message: { type: 'string' }
-  },
-  required: ['success', 'message'],
-  additionalProperties: false
-};
-
-// Common HTTP status response schemas
-export const commonResponseSchemas = {
-  400: {
-    description: 'Bad request',
-    ...errorResponseSchema
-  },
-  401: {
-    description: 'Unauthorized',
-    ...errorResponseSchema
-  },
-  403: {
-    description: 'Forbidden',
-    ...errorResponseSchema
-  },
-  404: {
-    description: 'Not found',
-    ...errorResponseSchema
-  },
-  409: {
-    description: 'Conflict',
-    ...errorResponseSchema
-  },
-  422: {
-    description: 'Unprocessable entity',
-    ...errorResponseSchema
-  },
-  500: {
-    description: 'Internal server error',
-    ...errorResponseSchema
-  }
-};
-
-// Helper function to create a complete response schema
-export function createResponseSchema(
-  successSchema: any,
-  additionalResponses: Record<string, any> = {}
-): Record<string, any> {
+// Full response schema factory
+export function createResponseSchema<T extends TSchema>(
+  successSchema: T,
+  additional: Record<number, TSchema> = {}
+) {
   return {
-    200: {
-      description: 'Successful response',
-      ...successSchema
-    },
-    ...commonResponseSchemas,
-    ...additionalResponses
+    200: createSuccessResponseSchema(successSchema),
+    ...commonErrorResponses,
+    ...additional
   };
 }
 
-// Helper function to create a simple success response schema
-export function createSuccessResponseSchema(dataSchema: unknown): unknown {
-  return {
-    type: 'object',
-    properties: {
-      success: { type: 'boolean' },
-      data: dataSchema
-    },
-    required: ['success', 'data'],
-    additionalProperties: false
-  };
-}
-
-// Helper function to create a message response schema
-export function createMessageResponseSchema(): unknown {
-  return messageResponseSchema;
-} 
+// Type exports for runtime and static typing
+export type SuccessResponse<T extends TSchema> = Static<ReturnType<typeof createSuccessResponseSchema<T>>>;
+export type ErrorResponse = Static<typeof ErrorResponseSchema>;
+export type MessageResponse = Static<typeof MessageResponseSchema>; 

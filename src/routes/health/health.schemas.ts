@@ -1,22 +1,19 @@
-import { createResponseSchema, createSuccessResponseSchema } from '../../utils/schema.utils';
+import { Type } from '@sinclair/typebox';
+import { createResponseSchema } from '../../utils/schema.utils';
 
 // Health response data schema
-const healthResponseDataSchema = {
-  type: 'object',
-  properties: {
-    status: { type: 'string' },
-    timestamp: { type: 'string' },
-    uptime: { type: 'number' },
-    environment: { type: 'string' },
-    database: { type: 'string' }
-  },
-  required: ['status', 'timestamp', 'uptime', 'environment', 'database']
-};
+const HealthResponseDataSchema = Type.Object({
+  status: Type.String(),
+  timestamp: Type.String(),
+  uptime: Type.Number(),
+  environment: Type.String(),
+  database: Type.String()
+});
 
 export const healthSchemas = {
   getHealth: {
     description: 'Get API health status',
     tags: ['health'],
-    response: createResponseSchema(createSuccessResponseSchema(healthResponseDataSchema))
+    response: createResponseSchema(HealthResponseDataSchema)
   }
 }; 

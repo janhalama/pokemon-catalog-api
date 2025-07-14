@@ -2,12 +2,18 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { EntityManager } from '@mikro-orm/core';
 import { PokemonService } from '../../services/pokemon.service';
 import { ApiError } from '../../utils/api-error.utils';
-import type { 
-  PokemonListOptions, 
-  PokemonListResponse, 
+import {
+  PokemonListRoute,
+  PokemonByIdRoute,
+  FavoriteActionRoute,
+  FavoriteStatusRoute
+} from './pokemon.schemas';
+import type {
+  PokemonListOptions,
+  PokemonListResponse,
   PokemonData,
   FavoriteResponse,
-  FavoriteActionResponse 
+  FavoriteActionResponse
 } from '../../types/pokemon.types';
 
 declare module 'fastify' {
@@ -20,44 +26,9 @@ declare module 'fastify' {
   }
 }
 
-interface PokemonListRoute {
-  Querystring: {
-    page?: string;
-    limit?: string;
-    q?: string;
-    name?: string;
-    type?: string;
-    favorites?: string;
-  };
-  Reply: {
-    success: boolean;
-    data: PokemonListResponse | PokemonData;
-  };
-}
-
-interface PokemonByIdRoute {
-  Params: {
-    id: string;
-  };
-  Reply: {
-    success: boolean;
-    data: PokemonData;
-  };
-}
-
-interface FavoriteRoute {
-  Params: {
-    id: string;
-  };
-  Reply: {
-    success: boolean;
-    data: FavoriteResponse | FavoriteActionResponse;
-  };
-}
-
 export class PokemonController {
   async getPokemonList(
-    request: FastifyRequest<PokemonListRoute>, 
+    request: FastifyRequest<PokemonListRoute>,
     reply: FastifyReply<PokemonListRoute>
   ): Promise<void> {
     const { page, limit, q, name, type, favorites } = request.query;
@@ -65,6 +36,19 @@ export class PokemonController {
 
     const entityManager = this.getEntityManagerFromRequest(request);
     const pokemonService = new PokemonService(entityManager);
+
+    // Validate type parameter against database values if provided
+    if (type) {
+      const validTypes = await pokemonService.getPokemonTypes();
+      if (!validTypes.includes(type)) {
+        throw ApiError.badRequest(`Invalid Pokemon type. Valid types are: ${validTypes.join(', ')}`);
+      }
+    }
+
+    // Validate favorites parameter
+    if (favorites && favorites !== 'true' && favorites !== 'false') {
+      throw ApiError.badRequest('Invalid favorites parameter. Must be "true" or "false"');
+    }
 
     // Handle exact name search directly
     if (name) {
@@ -98,7 +82,7 @@ export class PokemonController {
   }
 
   async getPokemonById(
-    request: FastifyRequest<PokemonByIdRoute>, 
+    request: FastifyRequest<PokemonByIdRoute>,
     reply: FastifyReply<PokemonByIdRoute>
   ): Promise<void> {
     const { id } = request.params;
@@ -118,8 +102,8 @@ export class PokemonController {
   }
 
   async addToFavorites(
-    request: FastifyRequest<FavoriteRoute>, 
-    reply: FastifyReply<FavoriteRoute>
+    request: FastifyRequest<FavoriteActionRoute>,
+    reply: FastifyReply<FavoriteActionRoute>
   ): Promise<void> {
     const { id } = request.params;
     const userId = request.authenticatedUser?.id;
@@ -144,8 +128,8 @@ export class PokemonController {
   }
 
   async removeFromFavorites(
-    request: FastifyRequest<FavoriteRoute>, 
-    reply: FastifyReply<FavoriteRoute>
+    request: FastifyRequest<FavoriteActionRoute>,
+    reply: FastifyReply<FavoriteActionRoute>
   ): Promise<void> {
     const { id } = request.params;
     const userId = request.authenticatedUser?.id;
@@ -170,8 +154,8 @@ export class PokemonController {
   }
 
   async checkFavoriteStatus(
-    request: FastifyRequest<FavoriteRoute>, 
-    reply: FastifyReply<FavoriteRoute>
+    request: FastifyRequest<FavoriteStatusRoute>,
+    reply: FastifyReply<FavoriteStatusRoute>
   ): Promise<void> {
     const { id } = request.params;
     const userId = request.authenticatedUser?.id;
@@ -195,7 +179,7 @@ export class PokemonController {
   }
 
   async getPokemonTypes(
-    request: FastifyRequest, 
+    request: FastifyRequest,
     reply: FastifyReply
   ): Promise<void> {
     const entityManager = this.getEntityManagerFromRequest(request);

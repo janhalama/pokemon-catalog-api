@@ -1,68 +1,33 @@
-import { createResponseSchema, createSuccessResponseSchema } from '../../utils/schema.utils';
+import { Type } from '@sinclair/typebox';
+import { createResponseSchema } from '../../utils/schema.utils';
 
 // Auth response data schema
-const authResponseDataSchema = {
-  type: 'object',
-  properties: {
-    token: { type: 'string' },
-    user: {
-      type: 'object',
-      properties: {
-        id: { type: 'number' },
-        email: { type: 'string', format: 'email' },
-        name: { type: 'string' }
-      },
-      required: ['id', 'email', 'name']
-    }
-  },
-  required: ['token', 'user']
-};
+const AuthResponseDataSchema = Type.Object({
+  token: Type.String(),
+  user: Type.Object({
+    id: Type.Number(),
+    email: Type.String({ format: 'email' }),
+    name: Type.String()
+  })
+});
 
 export const registerSchema = {
   description: 'Register a new user',
   tags: ['auth'],
-  body: {
-    type: 'object',
-    required: ['email', 'password', 'name'],
-    properties: {
-      email: {
-        type: 'string',
-        format: 'email',
-        description: 'User email address'
-      },
-      password: {
-        type: 'string',
-        minLength: 8,
-        description: 'User password (minimum 8 characters)'
-      },
-      name: {
-        type: 'string',
-        minLength: 2,
-        maxLength: 100,
-        description: 'User full name'
-      }
-    }
-  },
-  response: createResponseSchema(createSuccessResponseSchema(authResponseDataSchema))
+  body: Type.Object({
+    email: Type.String({ format: 'email', description: 'User email address' }),
+    password: Type.String({ minLength: 8, description: 'User password (minimum 8 characters)' }),
+    name: Type.String({ minLength: 2, maxLength: 100, description: 'User full name' })
+  }),
+  response: createResponseSchema(AuthResponseDataSchema)
 };
 
 export const loginSchema = {
   description: 'Login with email and password',
   tags: ['auth'],
-  body: {
-    type: 'object',
-    required: ['email', 'password'],
-    properties: {
-      email: {
-        type: 'string',
-        format: 'email',
-        description: 'User email address'
-      },
-      password: {
-        type: 'string',
-        description: 'User password'
-      }
-    }
-  },
-  response: createResponseSchema(createSuccessResponseSchema(authResponseDataSchema))
+  body: Type.Object({
+    email: Type.String({ format: 'email', description: 'User email address' }),
+    password: Type.String({ description: 'User password' })
+  }),
+  response: createResponseSchema(AuthResponseDataSchema)
 }; 

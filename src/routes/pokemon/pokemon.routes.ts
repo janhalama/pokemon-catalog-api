@@ -7,7 +7,11 @@ import {
   addToFavoritesSchema,
   removeFromFavoritesSchema,
   checkFavoriteStatusSchema,
-  pokemonTypesSchema
+  pokemonTypesSchema,
+  PokemonListRoute,
+  PokemonByIdRoute,
+  FavoriteActionRoute,
+  FavoriteStatusRoute
 } from './pokemon.schemas';
 
 export async function registerPokemonRoutes(
@@ -16,35 +20,35 @@ export async function registerPokemonRoutes(
   const pokemonController = new PokemonController();
 
   // Get Pokemon list with search and filtering
-  fastify.get('/api/pokemon', {
+  fastify.get<PokemonListRoute>('/api/pokemon', {
     schema: pokemonListSchema,
     preHandler: authenticate,
     handler: pokemonController.getPokemonList.bind(pokemonController)
   });
 
   // Get Pokemon by ID
-  fastify.get('/api/pokemon/:id', {
+  fastify.get<PokemonByIdRoute>('/api/pokemon/:id', {
     schema: pokemonByIdSchema,
     preHandler: authenticate,
     handler: pokemonController.getPokemonById.bind(pokemonController)
   });
 
   // Add Pokemon to favorites
-  fastify.post('/api/pokemon/:id/favorite', {
+  fastify.post<FavoriteActionRoute>('/api/pokemon/:id/favorite', {
     schema: addToFavoritesSchema,
     preHandler: authenticate,
     handler: pokemonController.addToFavorites.bind(pokemonController)
   });
 
   // Remove Pokemon from favorites
-  fastify.delete('/api/pokemon/:id/favorite', {
+  fastify.delete<FavoriteActionRoute>('/api/pokemon/:id/favorite', {
     schema: removeFromFavoritesSchema,
     preHandler: authenticate,
     handler: pokemonController.removeFromFavorites.bind(pokemonController)
   });
 
   // Check favorite status
-  fastify.get('/api/pokemon/:id/favorite', {
+  fastify.get<FavoriteStatusRoute>('/api/pokemon/:id/favorite', {
     schema: checkFavoriteStatusSchema,
     preHandler: authenticate,
     handler: pokemonController.checkFavoriteStatus.bind(pokemonController)
